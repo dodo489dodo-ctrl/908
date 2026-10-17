@@ -171,6 +171,7 @@ export const ru = {
     outboxFailed: 'Не отправлено',
     outboxRetry: 'Повторить',
     outboxDelete: 'Удалить',
+    outboxDeleteConfirm: 'Неотправленная уборка и её фото/видео будут удалены безвозвратно. Продолжить?',
     outboxSynced: 'Отправлено',
     outboxMediaFailed: 'Медиа не отправлено',
     outboxMediaRetry: 'Повторить медиа',

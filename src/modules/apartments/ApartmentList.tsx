@@ -37,6 +37,7 @@ export function ApartmentList() {
   const [mediaFailedEntries, setMediaFailedEntries] = useState<OutboxEntry[]>([])
   const [retrying, setRetrying] = useState(false)
   const [confirmMediaDeleteId, setConfirmMediaDeleteId] = useState<string | null>(null)
+  const [confirmFailedDeleteId, setConfirmFailedDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!profile) return
@@ -79,6 +80,7 @@ export function ApartmentList() {
 
   const handleDeleteFailed = async (id: string) => {
     await deleteFailedEntry(id)
+    setConfirmFailedDeleteId(null)
   }
 
   const handleRetryMedia = async (id: string) => {
@@ -177,7 +179,7 @@ export function ApartmentList() {
                 <button onClick={() => handleRetryFailed(entry.id)} disabled={retrying} className="font-medium text-warn disabled:opacity-40">
                   {t.errors.outboxRetry}
                 </button>
-                <button onClick={() => handleDeleteFailed(entry.id)} className="font-medium text-bad">
+                <button onClick={() => setConfirmFailedDeleteId(entry.id)} className="font-medium text-bad">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -233,6 +235,15 @@ export function ApartmentList() {
           message={t.errors.outboxMediaDeleteConfirm}
           onConfirm={() => handleDeleteMedia(confirmMediaDeleteId)}
           onCancel={() => setConfirmMediaDeleteId(null)}
+        />
+      )}
+      {confirmFailedDeleteId && (
+        <ConfirmDialog
+          open={true}
+          title={t.errors.outboxDelete}
+          message={t.errors.outboxDeleteConfirm}
+          onConfirm={() => handleDeleteFailed(confirmFailedDeleteId)}
+          onCancel={() => setConfirmFailedDeleteId(null)}
         />
       )}
     </div>

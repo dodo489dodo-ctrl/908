@@ -174,6 +174,7 @@ export const ar: Dict = {
     outboxFailed: 'متبعتش',
     outboxRetry: 'ابعت تاني',
     outboxDelete: 'امسح',
+    outboxDeleteConfirm: 'النظافة اللي ما اتبعتش وصورها/فيديوهاتها هتتمسح نهائيًا. تكمل؟',
     outboxSynced: 'اتبعت',
     outboxMediaFailed: 'الميديا ما اتبعتش',
     outboxMediaRetry: 'إعادة الميديا',

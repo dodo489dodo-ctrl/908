@@ -173,6 +173,7 @@ export const en: Dict = {
     outboxFailed: 'Not sent',
     outboxRetry: 'Retry',
     outboxDelete: 'Delete',
+    outboxDeleteConfirm: 'The unsent cleaning and its photos/videos will be deleted permanently. Continue?',
     outboxSynced: 'Sent',
     outboxMediaFailed: 'Media not sent',
     outboxMediaRetry: 'Retry media',

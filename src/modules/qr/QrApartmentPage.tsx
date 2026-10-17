@@ -22,7 +22,7 @@ import { getOutboxSummary, getOutboxEntries, subscribe, flushOutbox, retryMediaE
 import {
   CircleCheck as CheckCircle2, Wrench, Search, Send, Camera, Video, X, FileText,
   Loader as Loader2, MessageCircle, RefreshCw, ChevronRight, Image as ImageIcon,
-  History as HistoryIcon, Trash2, TriangleAlert as AlertTriangle,
+  History as HistoryIcon, Trash2,
 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 
@@ -221,6 +221,16 @@ export function QrApartmentPage() {
     }
     loadUrls()
   }, [incidentPhotos, incidentFileUrls])
+
+  const handleRetryFailed = async (id: string) => {
+    setRetrying(true)
+    try {
+      await retryFailedEntry(id)
+      if (profile) await flushOutbox(profile.id)
+    } catch { /* error is shown via entry status */ } finally {
+      setRetrying(false)
+    }
+  }
 
   const handleAddNote = async (photoPath: string | null) => {
     if (!noteText.trim() && !photoPath) return
@@ -555,7 +565,20 @@ export function QrApartmentPage() {
               <p className="text-warn">{t.errors.outboxQueued}: {n(String(pendingCount))}</p>
             )}
             {failedCount > 0 && (
-              <p className="text-bad">{t.errors.outboxFailed}: {n(String(failedCount))}</p>
+              <div className="space-y-1">
+                <p className="text-bad">{t.errors.outboxFailed}: {n(String(failedCount))}</p>
+                {failedEntries.map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-center gap-2 text-bad">
+                    <span className="truncate max-w-[140px]">{entry.lastError ?? 'Error'}</span>
+                    <button onClick={() => handleRetryFailed(entry.id)} disabled={retrying} className="font-medium text-warn disabled:opacity-40">
+                      {t.errors.outboxRetry}
+                    </button>
+                    <button onClick={() => setConfirmFailedDeleteId(entry.id)} className="font-medium text-bad">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
             {mediaPendingCount > 0 && (
               <p className="text-warn">{t.errors.outboxMediaPending}: {n(String(mediaPendingCount))}</p>
@@ -580,34 +603,6 @@ export function QrApartmentPage() {
         )}
       </div>
 
-      {(failedCount > 0) && (
-        <div className="fixed bottom-[5.5rem] left-0 right-0 z-20 px-4">
-          <div className="max-w-lg mx-auto bg-bad-soft border border-line rounded-xl px-3 py-2 space-y-2">
-            <div className="flex items-center gap-2 text-xs text-bad">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-              <span>{t.errors.outboxFailed}: {n(String(failedCount))}</span>
-            </div>
-            {failedEntries.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between gap-2 text-xs text-bad bg-surface rounded-lg px-3 py-2">
-                <span className="truncate flex-1">{entry.lastError ?? 'Error'}</span>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => { setRetrying(true); retryFailedEntry(entry.id).then(() => { if (profile) flushOutbox(profile.id).catch(() => {}).finally(() => setRetrying(false)) }) }}
-                    disabled={retrying}
-                    className="font-medium text-warn disabled:opacity-40"
-                  >
-                    {t.errors.outboxRetry}
-                  </button>
-                  <button onClick={() => setConfirmFailedDeleteId(entry.id)} className="font-medium text-bad">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {confirmMediaDeleteId && (
         <ConfirmDialog
           open={true}
@@ -622,6 +617,7 @@ export function QrApartmentPage() {
         <ConfirmDialog
           open={true}
           title={t.errors.outboxDelete}
+          message={t.errors.outboxDeleteConfirm}
           onConfirm={() => { deleteFailedEntry(confirmFailedDeleteId); setConfirmFailedDeleteId(null) }}
           onCancel={() => setConfirmFailedDeleteId(null)}
         />

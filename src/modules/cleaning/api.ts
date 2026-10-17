@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { toApiError } from '@/lib/errors'
 import { resolveMime, extForMime } from '@/lib/files'
 import type { CleaningResult } from '@/lib/database.types'
-import { addOutboxEntry, QuotaExceededError } from '@/lib/outbox'
+import { addOutboxEntry } from '@/lib/outbox'
 import { toast } from '@/lib/toast'
 import { currentDict } from '@/i18n'
 
@@ -48,12 +48,8 @@ export async function completeCleaning(params: {
           status: 'done',
         })
         toast(currentDict().cleaning.mediaWillRetry, 'info')
-      } catch (e) {
-        if (e instanceof QuotaExceededError) {
-          toast(currentDict().cleaning.mediaSaveFailed, 'error')
-        } else {
-          toast(currentDict().cleaning.mediaSaveFailed, 'error')
-        }
+      } catch {
+        toast(currentDict().cleaning.mediaSaveFailed, 'error')
       }
     }
   }
