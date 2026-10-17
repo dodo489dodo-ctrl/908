@@ -75,3 +75,9 @@ export function emptyIncidentFilters(): IncidentHistoryFilters {
 export function escapeIlike(text: string): string {
   return text.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_')
 }
+
+export function shiftDateUTC(date: string, days: number): string {
+  const d = new Date(`${date}T12:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}

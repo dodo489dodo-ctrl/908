@@ -8,7 +8,7 @@ import type {
   CleaningHistoryFilters,
   IncidentHistoryFilters,
 } from './types'
-import { PAGE_SIZE, escapeIlike } from './types'
+import { PAGE_SIZE, escapeIlike, shiftDateUTC } from './types'
 
 export interface PagedResult<T> {
   rows: T[]
@@ -30,8 +30,9 @@ function buildCleaningQuery(apartmentId: number | null, filters: CleaningHistory
     if (iso) q = q.gte('cleaned_at', iso)
   }
   if (filters.dateTo) {
-    const iso = cairoLocalToISO(filters.dateTo + 'T23:59')
-    if (iso) q = q.lte('cleaned_at', iso)
+    const next = shiftDateUTC(filters.dateTo, 1)
+    const iso = cairoLocalToISO(next + 'T00:00')
+    if (iso) q = q.lt('cleaned_at', iso)
   }
   if (filters.hasMedia) q = q.not('media_paths', 'eq', '{}')
   if (filters.status) q = q.eq('status', filters.status)
@@ -77,8 +78,9 @@ function buildIncidentQuery(apartmentId: number | null, filters: IncidentHistory
     if (iso) q = q.gte('created_at', iso)
   }
   if (filters.dateTo) {
-    const iso = cairoLocalToISO(filters.dateTo + 'T23:59')
-    if (iso) q = q.lte('created_at', iso)
+    const next = shiftDateUTC(filters.dateTo, 1)
+    const iso = cairoLocalToISO(next + 'T00:00')
+    if (iso) q = q.lt('created_at', iso)
   }
   if (filters.hasMedia) q = q.not('photo_paths', 'eq', '{}')
   if (filters.status) q = q.eq('status', filters.status)

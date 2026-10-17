@@ -4,7 +4,6 @@ import { useI18n } from '@/i18n'
 import { formatDateTime, formatQty } from '@/lib/format'
 import { friendlyMessage, toApiError } from '@/lib/errors'
 import { toast, errorMessage } from '@/lib/toast'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { MediaViewer } from './MediaViewer'
 import { fetchCleaningLines, deleteCleaningEvent, removeStorageFiles } from './api'
 import type { SvCleaningEventRow, SvCleaningEventLineRow } from './types'
@@ -176,16 +175,6 @@ export function CleaningDetailSheet({ event, canDelete, onClose, onDeleted, onRe
         <MediaViewer bucket="cleaning-media" paths={mediaPaths} onClose={() => setShowMedia(false)} />
       )}
 
-      {confirmDelete && (
-        <ConfirmDialog
-          open={true}
-          title={t.history.deleteTitle}
-          message={t.history.deleteWarning}
-          confirmLabel={t.history.delete}
-          onConfirm={handleDelete}
-          onCancel={() => { setConfirmDelete(false); setReason('') }}
-        />
-      )}
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/45 z-[75] flex items-center justify-center anim-scrim" onClick={() => { setConfirmDelete(false); setReason('') }}>
           <div className="bg-surface rounded-2xl p-5 max-w-sm w-full mx-4 border border-line" onClick={(e) => e.stopPropagation()}>
