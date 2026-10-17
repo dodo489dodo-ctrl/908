@@ -129,6 +129,11 @@ export function CleaningSheet({ backTo }: { backTo?: string }) {
     let hadError = false
     let runningTotal = currentTotalSize
 
+    if (incoming.length > remaining) {
+      setError(d.mediaTooMany)
+      hadError = true
+    }
+
     for (const file of incoming.slice(0, remaining)) {
       if (isHeicFile(file)) {
         setConverting(true)
@@ -217,8 +222,8 @@ export function CleaningSheet({ backTo }: { backTo?: string }) {
           setOffline(true)
           const timer = setTimeout(() => goBack(), 1500)
           setGoBackTimer(timer)
-        } catch {
-          setError(friendlyMessage(e))
+        } catch (nestedErr) {
+          setError(friendlyMessage(nestedErr))
         }
       } else {
         setError(friendlyMessage(e))

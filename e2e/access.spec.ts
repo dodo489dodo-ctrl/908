@@ -20,7 +20,8 @@ async function login(page: Page, login: string, password: string) {
 test.describe('Access control', () => {
   test('self-registered account has no data access and cannot enter app', async ({ page }) => {
     const c = createClient(SUPA_URL, SUPA_ANON)
-    const email = `e2e_self_${Date.now()}@sklad.internal`
+    const loginName = `e2e_self_${Date.now()}`
+    const email = `${loginName}@sklad.internal`
     const { data, error } = await c.auth.signUp({ email, password: 'TestPass123!' })
     expect(error).toBeNull()
     // If email confirmation is enabled, there's no session — skip
@@ -55,7 +56,7 @@ test.describe('Access control', () => {
     expect(moveErr).toBeTruthy()
 
     // Verify via UI: login stays on the login screen
-    await login(page, email, 'TestPass123!')
+    await login(page, loginName, 'TestPass123!')
     await expect(page.getByTestId('login-form')).toBeVisible({ timeout: 10000 })
     await expect(page).not.toHaveURL(/\/(admin|sv)/)
   })

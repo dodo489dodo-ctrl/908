@@ -18,12 +18,13 @@ import { useAuth } from '@/modules/core/store'
 import { useI18n } from '@/i18n'
 import { formatDateTime, isToday, formatQty } from '@/lib/format'
 import { toast, errorMessage } from '@/lib/toast'
-import { getOutboxSummary, getOutboxEntries, subscribe, flushOutbox, retryMediaEntry, discardMediaEntry, type OutboxEntry } from '@/lib/outbox'
+import { getOutboxSummary, getOutboxEntries, subscribe, flushOutbox, retryMediaEntry, discardMediaEntry, retryFailedEntry, deleteFailedEntry, type OutboxEntry } from '@/lib/outbox'
 import {
   CircleCheck as CheckCircle2, Wrench, Search, Send, Camera, Video, X, FileText,
   Loader as Loader2, MessageCircle, RefreshCw, ChevronRight, Image as ImageIcon,
-  History as HistoryIcon,
+  History as HistoryIcon, Trash2, TriangleAlert as AlertTriangle,
 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 const normTypeOrder: NormType[] = ['asset_standing', 'turnover_replenish', 'cleaning_consumption']
 
@@ -64,6 +65,10 @@ export function QrApartmentPage() {
   const [mediaFailedCount, setMediaFailedCount] = useState(0)
   const [mediaPendingCount, setMediaPendingCount] = useState(0)
   const [mediaFailedEntries, setMediaFailedEntries] = useState<OutboxEntry[]>([])
+  const [failedEntries, setFailedEntries] = useState<OutboxEntry[]>([])
+  const [confirmMediaDeleteId, setConfirmMediaDeleteId] = useState<string | null>(null)
+  const [confirmFailedDeleteId, setConfirmFailedDeleteId] = useState<string | null>(null)
+  const [retrying, setRetrying] = useState(false)
   const [tab, setTab] = useState<Tab>('norms')
   const [cleaningEvents, setCleaningEvents] = useState<SvCleaningEvent[]>([])
   const [search, setSearch] = useState('')
@@ -124,6 +129,7 @@ export function QrApartmentPage() {
         })
         getOutboxEntries(profile.id).then((entries) => {
           setMediaFailedEntries(entries.filter((e) => (e.mediaStatus ?? 'none') === 'failed'))
+          setFailedEntries(entries.filter((e) => e.status === 'failed'))
         })
       }
       refreshOutbox()
@@ -563,7 +569,7 @@ export function QrApartmentPage() {
                     <button onClick={() => { retryMediaEntry(entry.id).then(() => { if (profile) flushOutbox(profile.id).catch(() => {}) }) }} className="font-medium text-warn">
                       {t.errors.outboxMediaRetry}
                     </button>
-                    <button onClick={() => discardMediaEntry(entry.id)} className="font-medium text-bad">
+                    <button onClick={() => setConfirmMediaDeleteId(entry.id)} className="font-medium text-bad">
                       {t.errors.outboxMediaDelete}
                     </button>
                   </div>
@@ -573,6 +579,53 @@ export function QrApartmentPage() {
           </div>
         )}
       </div>
+
+      {(failedCount > 0) && (
+        <div className="fixed bottom-[5.5rem] left-0 right-0 z-20 px-4">
+          <div className="max-w-lg mx-auto bg-bad-soft border border-line rounded-xl px-3 py-2 space-y-2">
+            <div className="flex items-center gap-2 text-xs text-bad">
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+              <span>{t.errors.outboxFailed}: {n(String(failedCount))}</span>
+            </div>
+            {failedEntries.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between gap-2 text-xs text-bad bg-surface rounded-lg px-3 py-2">
+                <span className="truncate flex-1">{entry.lastError ?? 'Error'}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => { setRetrying(true); retryFailedEntry(entry.id).then(() => { if (profile) flushOutbox(profile.id).catch(() => {}).finally(() => setRetrying(false)) }) }}
+                    disabled={retrying}
+                    className="font-medium text-warn disabled:opacity-40"
+                  >
+                    {t.errors.outboxRetry}
+                  </button>
+                  <button onClick={() => setConfirmFailedDeleteId(entry.id)} className="font-medium text-bad">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {confirmMediaDeleteId && (
+        <ConfirmDialog
+          open={true}
+          title={t.errors.outboxMediaDelete}
+          message={t.errors.outboxMediaDeleteConfirm}
+          onConfirm={() => { discardMediaEntry(confirmMediaDeleteId); setConfirmMediaDeleteId(null) }}
+          onCancel={() => setConfirmMediaDeleteId(null)}
+        />
+      )}
+
+      {confirmFailedDeleteId && (
+        <ConfirmDialog
+          open={true}
+          title={t.errors.outboxDelete}
+          onConfirm={() => { deleteFailedEntry(confirmFailedDeleteId); setConfirmFailedDeleteId(null) }}
+          onCancel={() => setConfirmFailedDeleteId(null)}
+        />
+      )}
 
       {/* Detail modal */}
       {detail && (

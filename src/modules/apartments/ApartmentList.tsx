@@ -8,6 +8,7 @@ import { useI18n } from '@/i18n'
 import { isToday } from '@/lib/format'
 import { Search, CircleCheck as CheckCircle2, ChevronRight, RefreshCw, Trash2, TriangleAlert as AlertTriangle } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { friendlyMessage } from '@/lib/errors'
 
 const typeOrder: AptType[] = ['studio', '1br', '2br']
@@ -35,6 +36,7 @@ export function ApartmentList() {
   const [failedEntries, setFailedEntries] = useState<OutboxEntry[]>([])
   const [mediaFailedEntries, setMediaFailedEntries] = useState<OutboxEntry[]>([])
   const [retrying, setRetrying] = useState(false)
+  const [confirmMediaDeleteId, setConfirmMediaDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!profile) return
@@ -86,6 +88,7 @@ export function ApartmentList() {
 
   const handleDeleteMedia = async (id: string) => {
     await discardMediaEntry(id)
+    setConfirmMediaDeleteId(null)
   }
 
   const grouped = useMemo(() => {
@@ -152,7 +155,7 @@ export function ApartmentList() {
                 <button onClick={() => handleRetryMedia(entry.id)} disabled={retrying} className="font-medium text-warn disabled:opacity-40">
                   {t.errors.outboxMediaRetry}
                 </button>
-                <button onClick={() => handleDeleteMedia(entry.id)} className="font-medium text-bad">
+                <button onClick={() => setConfirmMediaDeleteId(entry.id)} className="font-medium text-bad">
                   {t.errors.outboxMediaDelete}
                 </button>
               </div>
@@ -221,6 +224,16 @@ export function ApartmentList() {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmMediaDeleteId && (
+        <ConfirmDialog
+          open={true}
+          title={t.errors.outboxMediaDelete}
+          message={t.errors.outboxMediaDeleteConfirm}
+          onConfirm={() => handleDeleteMedia(confirmMediaDeleteId)}
+          onCancel={() => setConfirmMediaDeleteId(null)}
+        />
       )}
     </div>
   )

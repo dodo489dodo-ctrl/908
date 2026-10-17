@@ -85,9 +85,10 @@ export class QuotaExceededError extends Error {
   }
 }
 
-export async function addOutboxEntry(entry: Omit<OutboxEntry, 'status' | 'lastError' | 'attempts' | 'mediaStatus' | 'mediaAttempts' | 'mediaError'> & { media?: Blob[] }): Promise<void> {
+export async function addOutboxEntry(entry: Omit<OutboxEntry, 'status' | 'lastError' | 'attempts' | 'mediaStatus' | 'mediaAttempts' | 'mediaError'> & { media?: Blob[]; status?: 'pending' | 'done' }): Promise<void> {
   const hasMedia = !!(entry.media && entry.media.length > 0)
   const id = entry.id
+  const status = entry.status ?? 'pending'
 
   if (hasMedia && entry.media) {
     try {
@@ -110,7 +111,7 @@ export async function addOutboxEntry(entry: Omit<OutboxEntry, 'status' | 'lastEr
     leadStaffId: entry.leadStaffId,
     note: entry.note,
     createdAt: entry.createdAt,
-    status: 'pending',
+    status,
     lastError: null,
     attempts: 0,
     mediaStatus: hasMedia ? 'pending' : 'none',
@@ -366,7 +367,7 @@ export function startOutboxSync(userId: string): void {
 
   intervalId = setInterval(async () => {
     const summary = await getOutboxSummary(userId)
-    if (summary.pending > 0 || summary.mediaFailed > 0 || summary.mediaPending > 0) {
+    if (summary.pending > 0 || summary.mediaPending > 0) {
       flushOutbox(userId).catch(() => {})
     }
   }, 30000)

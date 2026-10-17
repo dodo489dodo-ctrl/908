@@ -63,6 +63,7 @@ export function CleaningHistoryList({ apartmentId, canDelete, onRecalculate, onR
     } catch (e) {
       if (myReq !== reqIdRef.current) return
       setError(friendlyMessage(e))
+      setHasMore(false)
     } finally {
       if (myReq === reqIdRef.current) {
         setListLoading(false)

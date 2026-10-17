@@ -18,7 +18,11 @@ function QrRedirect() {
       ? `#/qr/${id}/${action}`
       : `#/qr/${id}`
     : '#/qr'
-  window.location.replace(`/qr.html${hash}`)
+
+  useEffect(() => {
+    window.location.replace(`/qr.html${hash}`)
+  }, [hash])
+
   return null
 }
 

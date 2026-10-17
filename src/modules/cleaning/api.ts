@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { toApiError } from '@/lib/errors'
 import { resolveMime, extForMime } from '@/lib/files'
 import type { CleaningResult } from '@/lib/database.types'
-import { addOutboxEntry } from '@/lib/outbox'
+import { addOutboxEntry, QuotaExceededError } from '@/lib/outbox'
 import { toast } from '@/lib/toast'
 import { currentDict } from '@/i18n'
 
@@ -33,19 +33,28 @@ export async function completeCleaning(params: {
     try {
       await uploadAndAttachMedia(params.userId, params.clientOpId, params.media)
     } catch {
-      await addOutboxEntry({
-        id: crypto.randomUUID(),
-        userId: params.userId,
-        apartmentId: params.apartmentId,
-        cleanedAt: params.cleanedAt,
-        clientOpId: params.clientOpId,
-        staffIds: params.staffIds,
-        leadStaffId: params.leadStaffId,
-        note: params.note,
-        createdAt: Date.now(),
-        media: params.media,
-      })
-      toast(currentDict().cleaning.mediaWillRetry, 'info')
+      try {
+        await addOutboxEntry({
+          id: crypto.randomUUID(),
+          userId: params.userId,
+          apartmentId: params.apartmentId,
+          cleanedAt: params.cleanedAt,
+          clientOpId: params.clientOpId,
+          staffIds: params.staffIds,
+          leadStaffId: params.leadStaffId,
+          note: params.note,
+          createdAt: Date.now(),
+          media: params.media,
+          status: 'done',
+        })
+        toast(currentDict().cleaning.mediaWillRetry, 'info')
+      } catch (e) {
+        if (e instanceof QuotaExceededError) {
+          toast(currentDict().cleaning.mediaSaveFailed, 'error')
+        } else {
+          toast(currentDict().cleaning.mediaSaveFailed, 'error')
+        }
+      }
     }
   }
 

@@ -62,6 +62,7 @@ export function IncidentHistoryList({ apartmentId, canDelete, refreshKey }: Prop
     } catch (e) {
       if (myReq !== reqIdRef.current) return
       setError(friendlyMessage(e))
+      setHasMore(false)
     } finally {
       if (myReq === reqIdRef.current) {
         setListLoading(false)

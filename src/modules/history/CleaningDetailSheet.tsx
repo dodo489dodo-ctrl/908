@@ -178,6 +178,7 @@ export function CleaningDetailSheet({ event, canDelete, onClose, onDeleted, onRe
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/45 z-[75] flex items-center justify-center anim-scrim" onClick={() => { setConfirmDelete(false); setReason('') }}>
           <div className="bg-surface rounded-2xl p-5 max-w-sm w-full mx-4 border border-line" onClick={(e) => e.stopPropagation()}>
+            <p className="text-sm text-warn mb-3">{t.history.deleteWarning}</p>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}

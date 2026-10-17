@@ -92,6 +92,11 @@ export function IncidentForm({ backTo }: { backTo?: string }) {
     const valid: File[] = []
     let hadError = false
 
+    if (incoming.length > remaining) {
+      setError(t.incidents.mediaTooMany)
+      hadError = true
+    }
+
     for (const file of incoming.slice(0, remaining)) {
       if (isHeicFile(file)) {
         setConverting(true)

@@ -43,10 +43,10 @@ async function svClient() {
  * Skips the test if no active staff exist.
  */
 async function createCleaning(c: ReturnType<typeof createClient>, apartmentId: number, note: string) {
-  const { data: staff, error: staffErr } = await c.from('staff').select('id').eq('active', true).limit(1)
+  const { data: staff, error: staffErr } = await c.from('sv_staff').select('id').limit(1)
   if (staffErr) throw staffErr
   if (!staff || staff.length === 0) {
-    test.skip(true, 'No active staff in sv_staff — complete_cleaning needs at least one staff member')
+    test.skip(true, 'No staff in sv_staff — complete_cleaning needs at least one staff member')
     return { clientOpId: '', eventId: '' }
   }
   const staffId = staff[0].id
