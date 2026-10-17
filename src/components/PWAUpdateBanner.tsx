@@ -11,7 +11,7 @@ export function PWAUpdateBanner() {
   const [outboxBlocked, setOutboxBlocked] = useState(false)
 
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisterError() {},

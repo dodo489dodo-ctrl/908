@@ -331,7 +331,7 @@ export interface ReverseCleaningResult {
   status: EventStatus
 }
 
-export interface RecalculateCleaningResult extends CleaningResult {}
+export type RecalculateCleaningResult = CleaningResult
 
 export interface ApproveIncidentResult {
   status: 'confirmed' | 'rejected'

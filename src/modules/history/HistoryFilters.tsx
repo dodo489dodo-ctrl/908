@@ -85,10 +85,11 @@ export function HistoryFilters(props: Props) {
   const hasActive = activeChips.length > 0
 
   return (
-    <div className="bg-surface rounded-xl border border-line">
+    <div className="bg-surface rounded-xl border border-line" data-testid="history-filters">
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full px-4 py-3 flex items-center justify-between text-left"
+        data-testid="filters-toggle"
       >
         <span className="text-sm font-medium text-ink flex items-center gap-2">
           <Search className="w-4 h-4 text-muted" />
@@ -126,6 +127,7 @@ export function HistoryFilters(props: Props) {
               value={props.search}
               onChange={(e) => props.onSearch(e.target.value)}
               placeholder={t.history.searchPlaceholder}
+              data-testid="search-input"
               className="w-full bg-app rounded-lg px-3 py-2.5 text-sm border border-line focus:border-accent focus:outline-none"
             />
           </div>
@@ -136,6 +138,7 @@ export function HistoryFilters(props: Props) {
                 type="date"
                 value={props.dateFrom}
                 onChange={(e) => props.onDateFrom(e.target.value)}
+                data-testid="date-from"
                 className="w-full bg-app rounded-lg px-3 py-2.5 text-sm border border-line focus:border-accent focus:outline-none"
               />
             </div>
@@ -145,6 +148,7 @@ export function HistoryFilters(props: Props) {
                 type="date"
                 value={props.dateTo}
                 onChange={(e) => props.onDateTo(e.target.value)}
+                data-testid="date-to"
                 className="w-full bg-app rounded-lg px-3 py-2.5 text-sm border border-line focus:border-accent focus:outline-none"
               />
             </div>
@@ -216,7 +220,7 @@ export function HistoryFilters(props: Props) {
             </div>
           )}
           {hasActive && (
-            <button onClick={props.onReset} className="text-sm text-muted hover:text-accent">
+            <button onClick={props.onReset} className="text-sm text-muted hover:text-accent" data-testid="filters-reset">
               {t.history.reset}
             </button>
           )}

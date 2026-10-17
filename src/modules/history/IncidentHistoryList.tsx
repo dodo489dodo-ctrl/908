@@ -135,6 +135,7 @@ export function IncidentHistoryList({ apartmentId, canDelete, refreshKey }: Prop
             <button
               key={inc.id}
               onClick={() => setSelected(inc)}
+              data-testid="incident-card"
               className="w-full text-left bg-surface border border-line rounded-xl px-4 py-3 hover:border-accent transition-colors"
             >
               <div className="flex items-center justify-between mb-1">

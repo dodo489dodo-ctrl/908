@@ -4,7 +4,7 @@ import { compressImage } from '@/lib/compress'
 import { resolveMime, validateVideo, isHeicFile, isImageFile } from '@/lib/files'
 import { currentDict } from '@/i18n'
 import type { SvApartment, SvNorm, SvItem, ApartmentNote, Contact, Incident } from '@/lib/database.types'
-import { swrFetch, cacheKey, normCacheKey } from '@/lib/offline-cache'
+import { swrFetch, normCacheKey } from '@/lib/offline-cache'
 import { fetchAllPages } from '@/lib/paginate'
 
 export async function fetchApartment(id: number): Promise<SvApartment | null> {
@@ -95,7 +95,7 @@ export async function uploadNoteFile(
 }
 
 const SIGNED_URL_TTL = 60 * 60 * 24 * 7
-let signedUrlCache = new Map<string, { url: string; expires: number }>()
+const signedUrlCache = new Map<string, { url: string; expires: number }>()
 
 export async function createSignedUrl(path: string): Promise<string> {
   const cached = signedUrlCache.get(path)

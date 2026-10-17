@@ -205,8 +205,6 @@ export function setupAuthListener() {
   authListenerSetup = true
 
   supabase.auth.onAuthStateChange((event) => {
-    const store = useAuth.getState()
-
     if (event === 'SIGNED_OUT') {
       if (useAuth.getState().state === 'login') return
       stopOutboxSync()

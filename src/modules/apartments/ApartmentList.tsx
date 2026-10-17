@@ -58,7 +58,7 @@ export function ApartmentList() {
     refresh()
     const unsub = subscribe(refresh)
     return unsub
-  }, [profile?.id])
+  }, [profile])
 
   const handleRetry = async () => {
     if (!profile) return

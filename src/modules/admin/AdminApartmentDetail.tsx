@@ -98,7 +98,7 @@ export function AdminApartmentDetail() {
 
   useEffect(() => {
     loadAll()
-  }, [aptId])
+  }, [aptId, loadAll])
 
   const gapItems = useMemo(() => gaps.filter((g) => g.gap > 0), [gaps])
 

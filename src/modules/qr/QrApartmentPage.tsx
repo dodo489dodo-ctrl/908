@@ -106,7 +106,7 @@ export function QrApartmentPage() {
     setCleaningEvents(ce)
     setIncidents(inc)
     setLastUpdated(new Date())
-  }, [aptId, profile?.id])
+  }, [aptId, profile])
 
   useEffect(() => {
     if (!aptId) return
@@ -130,7 +130,7 @@ export function QrApartmentPage() {
       const unsub = subscribe(refreshOutbox)
       return unsub
     }
-  }, [aptId, loadAll, profile?.id])
+  }, [aptId, loadAll, profile])
 
   useEffect(() => {
     const onVisible = () => { if (document.visibilityState === 'visible' && navigator.onLine) loadAll().catch(() => {}) }
@@ -200,7 +200,7 @@ export function QrApartmentPage() {
       } catch { /* leave as unavailable */ }
     }
     loadUrls()
-  }, [notePhotos])
+  }, [notePhotos, noteFileUrls])
 
   useEffect(() => {
     const loadUrls = async () => {
@@ -214,7 +214,7 @@ export function QrApartmentPage() {
       } catch { /* leave as unavailable */ }
     }
     loadUrls()
-  }, [incidentPhotos])
+  }, [incidentPhotos, incidentFileUrls])
 
   const handleAddNote = async (photoPath: string | null) => {
     if (!noteText.trim() && !photoPath) return

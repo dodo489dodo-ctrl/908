@@ -1,11 +1,9 @@
 import { test, expect, type Page } from '@playwright/test'
 
 const ALLOWED = process.env.E2E_ALLOW === '1'
-const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:4173'
-const SUPA_URL = process.env.E2E_SUPABASE_URL!
-const SUPA_ANON = process.env.E2E_SUPABASE_ANON_KEY!
 const ADMIN_LOGIN = process.env.E2E_ADMIN_LOGIN!
 const ADMIN_PW = process.env.E2E_ADMIN_PASSWORD!
+const QR_APARTMENT_ID = process.env.E2E_QR_APARTMENT_ID!
 
 test.skip(!ALLOWED, 'E2E_ALLOW=1 required')
 
@@ -21,57 +19,52 @@ test.describe('QR History', () => {
     await login(page, ADMIN_LOGIN, ADMIN_PW)
     await page.waitForURL(/\/(admin|sv)$/, { timeout: 15000 })
 
-    await page.goto('/qr/1/history')
-    await page.waitForTimeout(3000)
+    const aptId = QR_APARTMENT_ID
+    await page.goto(`/qr.html#/qr/${aptId}/history`)
+    await expect(page).toHaveURL(new RegExp(`/qr\\.html#/qr/${aptId}/history`))
 
-    const url = page.url()
-    expect(url).toContain('/qr/1/history')
+    await expect(page.getByTestId('history-filters')).toBeVisible({ timeout: 15000 })
 
-    const cleaningTab = page.locator('text=Уборки').first()
-    if (await cleaningTab.isVisible()) {
-      await cleaningTab.click()
-      await page.waitForTimeout(1000)
+    const toggle = page.getByTestId('filters-toggle')
+    await expect(toggle).toBeVisible()
+    await toggle.click()
 
-      const searchInput = page.locator('input[type="text"]').first()
-      if (await searchInput.isVisible()) {
-        await searchInput.fill('test')
-        await page.waitForTimeout(600)
-        await searchInput.fill('')
-        await page.waitForTimeout(600)
-      }
+    const searchInput = page.getByTestId('search-input')
+    await expect(searchInput).toBeVisible({ timeout: 5000 })
+    await searchInput.fill('zzz-no-match-xyz')
+    await expect(page.getByTestId('cleaning-card')).toHaveCount(0, { timeout: 5000 })
+    await searchInput.fill('')
+    await expect(page.getByTestId('cleaning-card').first()).toBeVisible({ timeout: 8000 })
 
-      const filterToggle = page.locator('text=Фильтры').first()
-      if (await filterToggle.isVisible()) {
-        await filterToggle.click()
-        await page.waitForTimeout(500)
-        const dateFrom = page.locator('input[type="date"]').first()
-        if (await dateFrom.isVisible()) {
-          await dateFrom.fill('2026-01-01')
-          await page.waitForTimeout(600)
-          await dateFrom.fill('')
-          await page.waitForTimeout(600)
-        }
-        await filterToggle.click()
-        await page.waitForTimeout(500)
-      }
+    const dateFrom = page.getByTestId('date-from')
+    await expect(dateFrom).toBeVisible()
+    await dateFrom.fill('2099-01-01')
+    await expect(page.getByTestId('cleaning-card')).toHaveCount(0, { timeout: 5000 })
+    await dateFrom.fill('')
 
-      const firstItem = page.locator('button.w-full.text-left').first()
-      if (await firstItem.isVisible()) {
-        await firstItem.click()
-        await page.waitForTimeout(1000)
-        const deleteBtn = page.locator('button:has-text("Удалить")')
-        const deleteVisible = await deleteBtn.isVisible().catch(() => false)
-        expect(deleteVisible).toBe(false)
-        const closeBtn = page.locator('button:has-text("Закрыть")').first()
-        if (await closeBtn.isVisible()) await closeBtn.click()
-        await page.waitForTimeout(500)
-      }
-    }
+    await expect(page.getByTestId('filters-reset')).toBeVisible()
+    await page.getByTestId('filters-reset').click()
 
-    const incidentTab = page.locator('text=Заявки').first()
-    if (await incidentTab.isVisible()) {
-      await incidentTab.click()
-      await page.waitForTimeout(1000)
-    }
+    const firstCard = page.getByTestId('cleaning-card').first()
+    await expect(firstCard).toBeVisible({ timeout: 8000 })
+    await firstCard.click()
+
+    const detail = page.getByTestId('cleaning-detail')
+    await expect(detail).toBeVisible({ timeout: 5000 })
+    await expect(detail.getByTestId('cleaning-delete-btn')).not.toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(detail).not.toBeVisible({ timeout: 5000 })
+
+    const incidentTab = page.getByTestId('tab-incidents')
+    await expect(incidentTab).toBeVisible()
+    await incidentTab.click()
+    await expect(page.getByTestId('incident-card').first()).toBeVisible({ timeout: 8000 })
+
+    const firstIncident = page.getByTestId('incident-card').first()
+    await firstIncident.click()
+    const incidentDetail = page.getByTestId('incident-detail')
+    await expect(incidentDetail).toBeVisible({ timeout: 5000 })
+    await expect(incidentDetail.getByTestId('incident-delete-btn')).not.toBeVisible()
   })
 })

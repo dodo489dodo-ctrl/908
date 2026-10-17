@@ -108,7 +108,6 @@ function Input({
   name: string
   autoComplete: string
 }) {
-  const { t } = useI18n()
   return (
     <label className="block">
       <span className="block text-sm text-muted mb-1.5">{label}</span>

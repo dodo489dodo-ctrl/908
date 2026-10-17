@@ -1,9 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
 const ALLOWED = process.env.E2E_ALLOW === '1'
-const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:4173'
-const SUPA_URL = process.env.E2E_SUPABASE_URL!
-const SUPA_ANON = process.env.E2E_SUPABASE_ANON_KEY!
 const ADMIN_LOGIN = process.env.E2E_ADMIN_LOGIN!
 const ADMIN_PW = process.env.E2E_ADMIN_PASSWORD!
 const SV_LOGIN = process.env.E2E_SV_LOGIN!

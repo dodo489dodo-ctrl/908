@@ -420,7 +420,6 @@ function ItemEditor({
 }
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  const { t } = useI18n()
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-[60]" onClick={onClose} />
@@ -436,7 +435,6 @@ function Modal({ title, children, onClose }: { title: string; children: React.Re
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  const { t } = useI18n()
   return (
     <div>
       <label className="block text-sm text-muted mb-1">{label}</label>

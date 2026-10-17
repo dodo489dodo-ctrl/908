@@ -66,7 +66,7 @@ export function IncidentDetailSheet({ incident, canDelete, onClose, onDeleted }:
   return (
     <>
       <div className="fixed inset-0 bg-black/45 z-[65] anim-scrim" onClick={onClose} />
-      <aside className="fixed top-0 right-0 bottom-0 w-full max-w-[440px] bg-surface z-[66] overflow-auto border-l border-line anim-drawer">
+      <aside className="fixed top-0 right-0 bottom-0 w-full max-w-[440px] bg-surface z-[66] overflow-auto border-l border-line anim-drawer" data-testid="incident-detail">
         <div className="sticky top-0 bg-surface border-b border-line px-5 py-3 flex items-center justify-between">
           <h2 className="text-base font-semibold text-ink">{t.history.incidentDetail}</h2>
           <button onClick={onClose} className="p-2 -mr-1 rounded-lg hover:bg-app"><X className="w-5 h-5 text-muted" /></button>
@@ -111,6 +111,7 @@ export function IncidentDetailSheet({ incident, canDelete, onClose, onDeleted }:
           {canDelete && (
             <button
               onClick={() => setConfirmDelete(true)}
+              data-testid="incident-delete-btn"
               className="w-full bg-bad-soft text-bad rounded-xl py-3 font-medium text-sm flex items-center justify-center gap-2"
             >
               <Trash2 className="w-4 h-4" />
@@ -132,6 +133,7 @@ export function IncidentDetailSheet({ incident, canDelete, onClose, onDeleted }:
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder={t.history.deleteReason}
+              data-testid="delete-reason"
               rows={3}
               className="w-full bg-app rounded-lg px-3 py-2.5 text-sm border border-line focus:border-accent focus:outline-none mb-4 resize-none"
             />
@@ -142,6 +144,7 @@ export function IncidentDetailSheet({ incident, canDelete, onClose, onDeleted }:
               <button
                 onClick={handleDelete}
                 disabled={deleting || !reason.trim()}
+                data-testid="confirm-delete"
                 className="flex-1 bg-bad text-white rounded-lg py-3 font-medium text-sm disabled:opacity-40 flex items-center justify-center gap-2"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}

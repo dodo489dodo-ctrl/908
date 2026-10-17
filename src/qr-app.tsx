@@ -16,11 +16,6 @@ import { Suspense, useEffect, lazy } from 'react'
 
 const SentryErrorBoundary = lazy(() => import('@/components/SentryErrorBoundary').then(m => ({ default: m.SentryErrorBoundary })))
 
-function Loading() {
-  const { t } = useI18n()
-  return <div className="px-4 pt-8 text-center text-muted">{t.app.loading}</div>
-}
-
 function QrCleanRoute() {
   const id = window.location.hash.match(/\/qr\/(\d+)\/clean/)?.[1]
   const backTo = `/qr/${id}`

@@ -191,7 +191,6 @@ export function QrPage() {
                     key={apt.id}
                     apt={apt}
                     qrDataUrl={qrCache.get(apt.id)}
-                    baseUrl={baseUrl}
                     isSelected={selected.has(apt.id)}
                     onToggle={() => toggleSelect(apt.id)}
                     onCopy={() => copyLink(apt.id)}
@@ -225,14 +224,12 @@ export function QrPage() {
 function QrCard({
   apt,
   qrDataUrl,
-  baseUrl,
   isSelected,
   onToggle,
   onCopy,
 }: {
   apt: SvApartment
   qrDataUrl: string | undefined
-  baseUrl: string
   isSelected: boolean
   onToggle: () => void
   onCopy: () => void

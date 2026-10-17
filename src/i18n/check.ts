@@ -4,8 +4,6 @@ import { ru } from './ru'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, extname, basename } from 'node:path'
 
-type Dict = typeof en
-
 function collectKeys(obj: Record<string, unknown>, prefix = ''): string[] {
   const keys: string[] = []
   for (const [k, v] of Object.entries(obj)) {

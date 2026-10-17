@@ -115,7 +115,7 @@ export function ReportsPage() {
       })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [range?.from, range?.to, reloadToken])
+  }, [range, reloadToken])
 
   const expenseRows = useMemo(() => {
     const grouped = new Map<string, ExpenseRow & { missingCost: boolean }>()

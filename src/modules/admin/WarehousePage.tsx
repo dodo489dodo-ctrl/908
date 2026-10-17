@@ -10,7 +10,6 @@ import { Search } from 'lucide-react'
 type KindFilter = 'all' | 'assets' | 'consumables'
 
 function ProgressBar({ value, color }: { value: number; color: string }) {
-  const { t, n } = useI18n()
   return (
     <span className="block h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--line)' }}>
       <span className="block h-full rounded-full" style={{ width: `${Math.min(value, 100)}%`, background: color }} />

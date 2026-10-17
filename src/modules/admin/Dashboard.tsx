@@ -103,7 +103,7 @@ export function Dashboard() {
       map.set(a.type, list)
     }
     return typeOrder.filter((t) => map.has(t)).map((t) => [typeLabels[t], map.get(t)!] as const)
-  }, [apartments])
+  }, [apartments, t.apartments.typeStudio, t.apartments.type1br, t.apartments.type2br])
 
   if (loading) {
     return <div className="px-4 pt-8 text-center text-muted">{t.app.loading}</div>
