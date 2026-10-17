@@ -80,7 +80,7 @@ export function LoginScreen({ title, subtitle }: { title?: string; subtitle?: st
             <p className="text-sm text-muted mt-1">{subtitle ?? t.auth.loginSubtitle}</p>
           </div>
         </div>
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-4" data-testid="login-form">
           <Input label={t.auth.login} value={login} onChange={setLogin} name="username" autoComplete="username" />
           <Input label={t.auth.password} value={password} onChange={setPassword} type="password" name="password" autoComplete="current-password" />
           {error && <p className="text-sm text-bad">{error}</p>}

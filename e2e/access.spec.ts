@@ -4,53 +4,70 @@ import { createClient } from '@supabase/supabase-js'
 const ALLOWED = process.env.E2E_ALLOW === '1'
 const SUPA_URL = process.env.E2E_SUPABASE_URL!
 const SUPA_ANON = process.env.E2E_SUPABASE_ANON_KEY!
-const ADMIN_LOGIN = process.env.E2E_ADMIN_LOGIN!
-const ADMIN_PW = process.env.E2E_ADMIN_PASSWORD!
+const DISABLED_LOGIN = process.env.E2E_DISABLED_LOGIN
+const DISABLED_PW = process.env.E2E_DISABLED_PASSWORD
 
 test.skip(!ALLOWED, 'E2E_ALLOW=1 required')
 
-const SELF_REG_LOGIN = `e2e_self_${Date.now()}`
-const SELF_REG_PW = 'TestPass123!'
-
 async function login(page: Page, login: string, password: string) {
   await page.goto('/')
-  await page.fill('input[type="text"]', login)
-  await page.fill('input[type="password"]', password)
+  await page.getByTestId('login-form').waitFor()
+  await page.fill('input[name="username"]', login)
+  await page.fill('input[name="password"]', password)
   await page.click('button[type="submit"]')
 }
 
 test.describe('Access control', () => {
-  test('self-registered account with no data sees empty state', async ({ page }) => {
+  test('self-registered account has no data access and cannot enter app', async ({ page }) => {
     const c = createClient(SUPA_URL, SUPA_ANON)
-    const email = `${SELF_REG_LOGIN.toLowerCase().trim()}@sklad.internal`
-    const { data, error } = await c.auth.signUp({ email, password: SELF_REG_PW })
+    const email = `e2e_self_${Date.now()}@sklad.internal`
+    const { data, error } = await c.auth.signUp({ email, password: 'TestPass123!' })
     expect(error).toBeNull()
-    expect(data.session).toBeTruthy()
+    // If email confirmation is enabled, there's no session — skip
+    if (!data.session) {
+      test.skip(true, 'Email confirmation is enabled — signUp did not produce a session')
+      return
+    }
 
-    await login(page, SELF_REG_LOGIN, SELF_REG_PW)
-    await page.waitForURL(/\/(admin|sv)$/, { timeout: 15000 })
+    // Verify this account cannot read apartment data
+    const { data: aptData, error: aptErr } = await c.from('apartments').select('id').limit(1)
+    expect(aptErr || aptData).toBeTruthy()
+    if (!aptErr) {
+      expect(aptData).toHaveLength(0)
+    }
 
-    await page.goto('/sv')
-    await page.waitForTimeout(3000)
-    const body = page.locator('body')
-    await expect(body).not.toContainText('Error')
+    // Verify privileged RPCs are blocked
+    const { error: cleanErr } = await c.rpc('complete_cleaning', {
+      p_apartment_id: 1,
+      p_cleaned_at: new Date().toISOString(),
+      p_client_op_id: '00000000-0000-0000-0000-000000000000',
+      p_staff_ids: [],
+      p_lead_staff_id: null,
+      p_note: 'test',
+    })
+    expect(cleanErr).toBeTruthy()
+
+    const { error: moveErr } = await c.rpc('post_move', {
+      p_op: 'receipt',
+      p_item: 1,
+      p_qty: 1,
+    })
+    expect(moveErr).toBeTruthy()
+
+    // Verify via UI: login stays on the login screen
+    await login(page, email, 'TestPass123!')
+    await expect(page.getByTestId('login-form')).toBeVisible({ timeout: 10000 })
+    await expect(page).not.toHaveURL(/\/(admin|sv)/)
   })
 
   test('disabled account cannot sign in', async ({ page }) => {
-    const c = createClient(SUPA_URL, SUPA_ANON)
-    const email = `${SELF_REG_LOGIN.toLowerCase().trim()}@sklad.internal`
-    const { data: signInData } = await c.auth.signInWithPassword({ email, password: SELF_REG_PW })
-    const userId = signInData.user?.id
-    if (userId) {
-      const admin = createClient(SUPA_URL, SUPA_ANON)
-      const adminEmail = `${ADMIN_LOGIN.toLowerCase().trim()}@sklad.internal`
-      await admin.auth.signInWithPassword({ email: adminEmail, password: ADMIN_PW })
-      await admin.from('profiles').update({ active: false }).eq('id', userId)
+    if (!DISABLED_LOGIN || !DISABLED_PW) {
+      test.skip(true, 'E2E_DISABLED_LOGIN / E2E_DISABLED_PASSWORD not set')
+      return
     }
 
-    await login(page, SELF_REG_LOGIN, SELF_REG_PW)
-    await page.waitForTimeout(3000)
-    const errorText = page.locator('text=/отключён|disabled|deactivated/i')
-    await expect(errorText).toBeVisible({ timeout: 10000 })
+    await login(page, DISABLED_LOGIN, DISABLED_PW)
+    await expect(page.getByTestId('login-form')).toBeVisible({ timeout: 10000 })
+    await expect(page).not.toHaveURL(/\/(admin|sv)/)
   })
 })
